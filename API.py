@@ -7,6 +7,7 @@ app = Flask(__name__, template_folder="template")
 file_name = "faces"
 app.config["IMAGE_UPLOADS"] = os.path.abspath(file_name)
 app.config["ALLOWED_IMAGE_EXTENSIONS"] = ["PNG", "JPG", "JPEG"]
+app.config["MAX_IMAGE_FILESIZE"] = 0.5 * 1024 * 1024
 
 
 def allowed_image(filename):
@@ -19,11 +20,22 @@ def allowed_image(filename):
         return False
 
 
+def allowed_image_filesize(filesize):
+    if int(filesize) <= app.config["MAX_IMAGE_FILESIZE"]:
+        return True
+    else:
+        return False
+
+
 @app.route("/upload-image", methods=["GET", "POST"])
 def upload_image():
     if request.method == "POST":
 
         if request.files:
+
+            if not allowed_image_filesize(request.cookies.get("filesize")):
+                print("File exceeded maximum size")
+                return redirect(request.url)
 
             image = request.files["image"]
 
