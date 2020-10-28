@@ -1,10 +1,8 @@
 import face_recognition as fr
 import os
 import cv2
-import face_recognition
 import numpy as np
-from time import sleep
-
+import face_recognition
 
 def get_encoded_faces():
     """
@@ -85,6 +83,7 @@ def classify_face(im):
             return face_names
 
 
-print(classify_face("test4.jpg"))
+#print(classify_face("test2.jpg"))
+
 
 
