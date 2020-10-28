@@ -10,16 +10,16 @@
   <div class="row">
     <div class="col">
 
-      <h1>Upload an image</h1>
+      <h1>Recognize an image</h1>
       <hr>
 
-      <form action="/upload-image" method="POST" enctype="multipart/form-data">
+      <form action="/recognize-image" method="POST" enctype="multipart/form-data">
         <div class="form-group">
           <label for="image">Select an image...</label>
-            <input oninput="filesize(this);" type="file" class="form-control-file" name="image" id="image">
+            <input type="file" class="form-control-file" name="image" id="image">
         </div>
 
-        <button type="submit" class="btn btn-primary">Upload image</button>
+        <button type="submit" class="btn btn-primary">Recognize</button>
 
       </form>
 
@@ -27,13 +27,4 @@
   </div>
 </div>
 </body>
-
-<script>
-
-  function filesize(element){
-
-    document.cookie = `filesize=${element.files[0].size}`;
- }
-
-</script>
 </html>

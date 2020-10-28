@@ -58,5 +58,11 @@ def upload_image():
     return render_template("webApp.html")
 
 
+@app.route("/recognize-image", methods=["GET", "POST"])
+def recognize_image():
+
+    return render_template("recognize.html")
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
