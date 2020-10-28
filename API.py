@@ -6,16 +6,43 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__, template_folder="template")
 file_name = "faces"
 app.config["IMAGE_UPLOADS"] = os.path.abspath(file_name)
+app.config["ALLOWED_IMAGE_EXTENSIONS"] = ["PNG", "JPG", "JPEG"]
+
+
+def allowed_image(filename):
+    if not "." in filename:
+        return False
+    extension_file = filename.rsplit(".", 1)[1]
+    if extension_file.upper() in app.config["ALLOWED_IMAGE_EXTENSIONS"]:
+        return True
+    else:
+        return False
 
 
 @app.route("/upload-image", methods=["GET", "POST"])
 def upload_image():
     if request.method == "POST":
+
         if request.files:
+
             image = request.files["image"]
-            image.save(os.path.join(app.config["IMAGE_UPLOADS"], image.filename))
+
+            if image.filename == "":
+                print("Image must have a filename")
+                return redirect(request.url)
+
+            if not allowed_image(image.filename):
+                print("That image extension is not allowed")
+                return redirect(request.url)
+
+            else:
+                filename = secure_filename(image.filename)
+                image.save(os.path.join(app.config["IMAGE_UPLOADS"], filename))
+
             print("Image saved")
+
             return redirect(request.url)
+
     return render_template("webApp.html")
 
 
