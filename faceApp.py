@@ -1,89 +1,89 @@
-import face_recognition as fr
-import os
+import face_recognition
 import cv2
 import numpy as np
-import face_recognition
 
-def get_encoded_faces():
-    """
-    looks through the faces folder and encodes all
-    the faces
+video_capture = cv2.VideoCapture(0)
 
-    :return: dict of (name, image encoded)
-    """
-    encoded = {}
+obama_image = face_recognition.load_image_file("faces/obama.jpg")
+obama_face_encoding = face_recognition.face_encodings(obama_image)[0]
 
-    for dirpath, dnames, fnames in os.walk("./faces"):
-        for f in fnames:
-            if f.endswith(".jpg") or f.endswith(".jpeg") or f.endswith(".png"):
-                face = fr.load_image_file("faces/" + f)
-                encoding = fr.face_encodings(face)[0]
-                encoded[f.split(".")[0]] = encoding
+biden_image = face_recognition.load_image_file("faces/biden.jpg")
+biden_face_encoding = face_recognition.face_encodings(biden_image)[0]
 
-    return encoded
+#genesis_image = face_recognition.load_image_file("faces/genesis.jpg")
+#genesis_face_encoding = face_recognition.face_encodings(genesis_image)[0]
 
+#evelyn_image = face_recognition.load_image_file("faces/evelyn.jpg")
+#evelyn_face_encoding = face_recognition.face_encodings(evelyn_image)[0]
 
-def unknown_image_encoded(img):
-    """
-    encode a face given the file name
-    """
-    face = fr.load_image_file("faces/" + img)
-    encoding = fr.face_encodings(face)[0]
+known_face_encodings = [
+    obama_face_encoding,
+    biden_face_encoding
+ #   genesis_face_encoding,
+  #  evelyn_face_encoding
+]
 
-    return encoding
+known_face_names = [
+    "Barack Obama",
+    "Joe Biden",
+    "Genesis Ozuna",
+    "Evelyn Ozuna"
+]
 
+face_locations = []
+face_encodings = []
+face_names = []
+process_this_frame = True
 
-def classify_face(im):
-    """
-    will find all of the faces in a given image and label
-    them if it knows what they are
+while True:
+    ret, frame = video_capture.read()
 
-    :param im: str of file path
-    :return: list of face names
-    """
-    faces = get_encoded_faces()
-    faces_encoded = list(faces.values())
-    known_face_names = list(faces.keys())
+    small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
 
-    img = cv2.imread(im, 1)
-    # img = cv2.resize(img, (0, 0), fx=0.5, fy=0.5)
-    # img = img[:,:,::-1]
+    rgb_small_frame = small_frame[:, :, ::-1]
 
-    face_locations = face_recognition.face_locations(img)
-    unknown_face_encodings = face_recognition.face_encodings(img, face_locations)
+    if process_this_frame:
+        face_locations = face_recognition.face_locations(rgb_small_frame)
+        face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
 
-    face_names = []
-    for face_encoding in unknown_face_encodings:
-        # See if the face is a match for the known face(s)
-        matches = face_recognition.compare_faces(faces_encoded, face_encoding)
-        name = "Unknown"
+        face_names = []
+        for face_encoding in face_encodings:
+            matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+            name = "Unknown"
 
-        # use the known face with the smallest distance to the new face
-        face_distances = face_recognition.face_distance(faces_encoded, face_encoding)
-        best_match_index = np.argmin(face_distances)
-        if matches[best_match_index]:
-            name = known_face_names[best_match_index]
+            # # If a match was found in known_face_encodings, just use the first one.
+            # if True in matches:
+            #     first_match_index = matches.index(True)
+            #     name = known_face_names[first_match_index]
 
-        face_names.append(name)
+            face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
+            best_match_index = np.argmin(face_distances)
+            if matches[best_match_index]:
+                name = known_face_names[best_match_index]
 
-        for (top, right, bottom, left), name in zip(face_locations, face_names):
-            # Draw a box around the face
-            cv2.rectangle(img, (left - 20, top - 20), (right + 20, bottom + 20), (255, 0, 0), 2)
+            face_names.append(name)
 
-            # Draw a label with a name below the face
-            cv2.rectangle(img, (left - 20, bottom - 15), (right + 20, bottom + 20), (255, 0, 0), cv2.FILLED)
-            font = cv2.FONT_HERSHEY_DUPLEX
-            cv2.putText(img, name, (left - 20, bottom + 15), font, 1.0, (255, 255, 255), 2)
-
-    # Display the resulting image
-    while True:
-
-        cv2.imshow('Recognition', img)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            return face_names
+    process_this_frame = not process_this_frame
 
 
-#print(classify_face("test2.jpg"))
+    # Display the results
+    for (top, right, bottom, left), name in zip(face_locations, face_names):
+        # Scale back up face locations since the frame we detected in was scaled to 1/4 size
+        top *= 4
+        right *= 4
+        bottom *= 4
+        left *= 4
 
+        cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
 
+        cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
+        font = cv2.FONT_HERSHEY_DUPLEX
+        cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
+    cv2.imshow('Video', frame)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+video_capture.release()
+cv2.destroyAllWindows()

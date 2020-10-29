@@ -9,21 +9,11 @@
 <div class="container">
   <div class="row">
     <div class="col">
-      <br>
-      <hr>
-      <h1>Recognize an image</h1>
-      <hr>
-
-      <form action="/recognize-image" method="POST" enctype="multipart/form-data">
-        <div class="form-group">
-          <label for="image">Select an image...</label>
-            <input type="file" class="form-control-file" name="image" id="image">
-        </div>
-
-        <button type="submit" class="btn btn-primary">Recognize image</button>
-
-      </form>
-
+        <br>
+        <hr>
+        <h1>Recognize an image using Camera</h1>
+        <hr>
+            <img src="{{ url_for('video') }}">
     </div>
   </div>
 </div>

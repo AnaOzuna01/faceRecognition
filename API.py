@@ -1,13 +1,20 @@
-from flask import Flask, request, redirect, render_template
+from flask import Flask, request, redirect, render_template, Response
 import os
-from faceApp import *
 from werkzeug.utils import secure_filename
+from imutils.video import VideoStream
+import imutils
+import cv2
 
 app = Flask(__name__, template_folder="template")
 file_name = "faces"
 app.config["IMAGE_UPLOADS"] = os.path.abspath(file_name)
 app.config["ALLOWED_IMAGE_EXTENSIONS"] = ["PNG", "JPG", "JPEG"]
 app.config["MAX_IMAGE_FILESIZE"] = 0.5 * 1024 * 1024
+
+
+@app.route("/")
+def index():
+    return render_template("index.html")
 
 
 def allowed_image(filename):
@@ -60,8 +67,28 @@ def upload_image():
 
 @app.route("/recognize-image", methods=["GET", "POST"])
 def recognize_image():
-
     return render_template("recognize.html")
+
+
+stream = VideoStream(src=0).start()
+
+
+@app.route("/camera-recognize-image")
+def camera_recognize_image():
+    return render_template("camera.html")
+
+
+@app.route("/video")
+def video():
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+def generate_frames():
+    while True:
+        frame = stream.read()
+        frame = imutils.resize(frame, width=1000)
+        (flag, encodedImage) = cv2.imencode(app.config["IMAGE_UPLOADS"], frame)
+        yield b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + bytearray(encodedImage) + b'\r\n'
 
 
 if __name__ == '__main__':
