@@ -1,7 +1,6 @@
 from flask import Flask, request, redirect, render_template, Response
 import os
 from werkzeug.utils import secure_filename
-import imutils
 import cv2
 
 app = Flask(__name__, template_folder="template")
@@ -69,6 +68,8 @@ def recognize_image():
     return render_template("recognize.html")
 
 
+cascPath = "haarcascade_frontalface_default.xml"
+faceCascade = cv2.CascadeClassifier(cascPath)
 stream = cv2.VideoCapture(0)
 
 
@@ -88,7 +89,19 @@ def generate_frames():
         if not success:
             break
         else:
-            # app.config["IMAGE_UPLOADS"]
+
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            faces = faceCascade.detectMultiScale(
+                gray,
+                scaleFactor=1.1,
+                minNeighbors=5,
+                minSize=(30, 30),
+                flags=cv2.CASCADE_SCALE_IMAGE
+            )
+
+            for (x, y, w, h) in faces:
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
             ret, buffer = cv2.imencode('.jpg', frame)
             frame = buffer.tobytes()
             yield b'--frame\r\n' \
