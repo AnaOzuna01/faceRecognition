@@ -1,7 +1,6 @@
 from flask import Flask, request, redirect, render_template, Response
 import os
 from werkzeug.utils import secure_filename
-from imutils.video import VideoStream
 import imutils
 import cv2
 
@@ -70,7 +69,7 @@ def recognize_image():
     return render_template("recognize.html")
 
 
-stream = VideoStream(src=0).start()
+stream = cv2.VideoCapture(0)
 
 
 @app.route("/camera-recognize-image")
@@ -78,17 +77,22 @@ def camera_recognize_image():
     return render_template("camera.html")
 
 
-@app.route("/video")
-def video():
+@app.route("/video_feed")
+def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 def generate_frames():
     while True:
-        frame = stream.read()
-        frame = imutils.resize(frame, width=1000)
-        (flag, encodedImage) = cv2.imencode(app.config["IMAGE_UPLOADS"], frame)
-        yield b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + bytearray(encodedImage) + b'\r\n'
+        success, frame = stream.read()
+        if not success:
+            break
+        else:
+            # app.config["IMAGE_UPLOADS"]
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+            yield b'--frame\r\n' \
+                  b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n'
 
 
 if __name__ == '__main__':
