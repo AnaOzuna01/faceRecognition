@@ -1,34 +1,28 @@
 import face_recognition
 import cv2
 import numpy as np
+import os
 
 video_capture = cv2.VideoCapture(0)
 
-obama_image = face_recognition.load_image_file("faces/obama.jpg")
-obama_face_encoding = face_recognition.face_encodings(obama_image)[0]
+image_path = 'faces/'
+content = os.listdir(image_path)
+images = []
+for faces in content:
+    if os.path.isfile(os.path.join(image_path, faces)) and (
+            faces.endswith('.jpg') or faces.endswith('.jpeg') or
+            faces.endswith('.png')):
+        images.append(faces)
+    complete_image_path = image_path + faces
+    print(complete_image_path)
 
-biden_image = face_recognition.load_image_file("faces/biden.jpg")
-biden_face_encoding = face_recognition.face_encodings(biden_image)[0]
+faces_image = face_recognition.load_image_file(complete_image_path)
+faces_image_encoding = face_recognition.face_encodings(faces_image)[0]
 
-#genesis_image = face_recognition.load_image_file("faces/genesis.jpg")
-#genesis_face_encoding = face_recognition.face_encodings(genesis_image)[0]
+known_face_encodings = [faces_image_encoding]
 
-#evelyn_image = face_recognition.load_image_file("faces/evelyn.jpg")
-#evelyn_face_encoding = face_recognition.face_encodings(evelyn_image)[0]
-
-known_face_encodings = [
-    obama_face_encoding,
-    biden_face_encoding
- #   genesis_face_encoding,
-  #  evelyn_face_encoding
-]
-
-known_face_names = [
-    "Barack Obama",
-    "Joe Biden",
-    "Genesis Ozuna",
-    "Evelyn Ozuna"
-]
+face_names = os.path.splitext(faces)[0]
+known_face_names = [face_names]
 
 face_locations = []
 face_encodings = []
@@ -64,7 +58,6 @@ while True:
             face_names.append(name)
 
     process_this_frame = not process_this_frame
-
 
     # Display the results
     for (top, right, bottom, left), name in zip(face_locations, face_names):
