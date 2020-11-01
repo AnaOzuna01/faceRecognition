@@ -5,22 +5,29 @@ import os
 
 video_capture = cv2.VideoCapture(0)
 
-image_path = 'faces/'
-content = os.listdir(image_path)
-images = []
-for faces in content:
-    if os.path.isfile(os.path.join(image_path, faces)) and (
-            faces.endswith('.jpg') or faces.endswith('.jpeg') or
-            faces.endswith('.png')):
-        images.append(faces)
-    complete_image_path = image_path + faces
-    print(complete_image_path)
 
-faces_image = face_recognition.load_image_file(complete_image_path)
+def load_images():
+    image_path = 'faces/'
+    content = os.listdir(image_path)
+    images = []
+    faces: str
+    for faces in content:
+        if os.path.isfile(os.path.join(image_path, faces)) and (
+                faces.endswith('.jpg') or faces.endswith('.jpeg') or
+                faces.endswith('.png')):
+            images.append(faces)
+        complete_image_path = image_path + faces
+    return complete_image_path
+
+
+print("load\n", load_images())
+
+faces_image = face_recognition.load_image_file(load_images())
 faces_image_encoding = face_recognition.face_encodings(faces_image)[0]
 
 known_face_encodings = [faces_image_encoding]
 
+faces = load_images()
 face_names = os.path.splitext(faces)[0]
 known_face_names = [face_names]
 
