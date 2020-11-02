@@ -2,6 +2,7 @@ from flask import Flask, request, redirect, render_template, Response
 import os
 from werkzeug.utils import secure_filename
 import cv2
+import subprocess
 
 app = Flask(__name__, template_folder="template")
 file_name = "faces"
@@ -106,6 +107,14 @@ def generate_frames():
             frame = buffer.tobytes()
             yield b'--frame\r\n' \
                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n'
+
+
+@app.route("/capture-images")
+def capture_images():
+    return_value, image = stream.read()
+    save = "faces/"
+    cv2.imwrite(os.path.join(save, "user.jpg"), image)
+    return render_template("camera.html")
 
 
 if __name__ == '__main__':

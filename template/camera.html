@@ -16,7 +16,9 @@
         <hr>
         <div class="col-lg-8  offset-lg-2">
             <button class="btn btn-success btn-lg active">Live Streaming <span class="glyphicon glyphicon-facetime-video"></span></button><br><br>
-            <img class="rounded float-left img-thumbnail" src="{{ url_for('video_feed') }}" width="80%">
+            <img class="rounded float-left img-thumbnail" src="{{ url_for('video_feed') }}" width="80%"><br><br>
+            <img class="btn btn-primary btn-lg" src="{{ url_for('capture_images') }}">
+            <p>Capture image <span class="glyphicon glyphicon-camera"></span></p>
         </div>
     </div>
   </div>
